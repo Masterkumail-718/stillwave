@@ -420,7 +420,7 @@ footer a:hover{color:var(--text)}
     const show = n => { num.textContent = Number(n).toLocaleString(); box.hidden = false; };
     try {
       const c = JSON.parse(localStorage.getItem('sw-dl') || 'null');
-      if (c && Date.now() - c.t < 600000) { show(c.n); return; }
+      if (c && Date.now() - c.t < 60000) { show(c.n); return; }
     } catch(e) {}
     fetch('https://api.github.com/repos/' + GH_REPO + '/releases?per_page=100')
       .then(r => r.ok ? r.json() : Promise.reject())
