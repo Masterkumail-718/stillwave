@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stillwave – Music player with a built-in ad-free browser</title>
+<meta name="description" content="Stillwave is a music player for Windows with an easy queue, automatic sorting by album, artist and genre, a built-in browser with adblock, an equalizer, reverb and directional sound.">
+<meta name="theme-color" content="#07130c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06110a;
+  --bg2:#0b1d12;
+  --panel:#0f2418;
+  --panel2:#14301f;
+  --line:rgba(160,230,150,.14);
+  --lime:#b4f05a;
+  --mint:#5fd88a;
+  --text:#e9f4e6;
+  --muted:#8ea894;
+  --radius:18px;
+  --head:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body);color:var(--text);line-height:1.6;
+  background:
+    radial-gradient(1100px 600px at 80% -10%,#1b4a2a 0%,transparent 60%),
+    radial-gradient(800px 500px at -10% 30%,#10331d 0%,transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:8px}
+.wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+h1,h2,h3{font-family:var(--head);line-height:1.05;letter-spacing:-.025em}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(6,17,10,.7);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:800;font-size:1.45rem;letter-spacing:-.03em}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#c9f77a,#5fd88a);display:grid;place-items:center}
+.logo-mark svg{width:20px;height:20px}
+.nav-links{display:flex;gap:28px;align-items:center;color:var(--muted);font-weight:500;font-size:.95rem}
+.nav-links a:hover{color:var(--text)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:14px;font-weight:600;font-size:1rem;border:1px solid var(--line);transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:linear-gradient(180deg,#c6f56f,#8fdc5a);color:#0a1f10;border-color:transparent;box-shadow:0 10px 30px -10px rgba(160,240,90,.5)}
+.btn-ghost{background:rgba(255,255,255,.04)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn-sm{padding:10px 18px;border-radius:12px;font-size:.92rem}
+.btn svg{width:18px;height:18px}
+
+/* hero */
+.hero{padding:84px 0 40px}
+.hero h1{font-size:clamp(2.7rem,7vw,5.4rem);font-weight:800;max-width:15ch}
+.hero p.lead{margin-top:24px;max-width:56ch;font-size:1.2rem;color:var(--muted)}
+.hero .actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.dlcount{display:inline-flex;align-items:center;gap:8px;padding:0 6px;color:var(--muted);font-size:.95rem}
+.dlcount[hidden]{display:none}
+.dlcount svg{width:16px;height:16px;color:var(--lime)}
+.dlcount b{color:var(--text);font-family:var(--head);font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}
+.meta{margin-top:18px;color:var(--muted);font-size:.9rem}
+
+/* app mockup */
+.app{
+  margin-top:64px;border-radius:22px;overflow:hidden;border:1px solid var(--line);
+  background:linear-gradient(160deg,#143a22,#08170e 70%);
+  box-shadow:0 50px 100px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.02);
+  display:grid;grid-template-columns:200px 1fr;
+}
+.side{padding:22px 14px;border-right:1px solid var(--line);background:rgba(0,0,0,.18)}
+.side .logo{font-size:1.2rem;margin:0 8px 22px}
+.side .logo-mark{width:28px;height:28px;border-radius:8px}
+.side div.item{padding:10px 12px;border-radius:10px;color:var(--muted);font-size:.9rem;font-weight:500}
+.side div.item.on{background:rgba(180,240,90,.1);border:1px solid rgba(180,240,90,.5);color:var(--text)}
+.main{padding:26px 28px 0}
+.main h3{font-size:2rem;font-weight:700}
+.main .sub{color:var(--muted);font-size:.9rem}
+.now{margin-top:18px;display:flex;gap:18px;align-items:center;padding:16px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(120deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.cover{width:76px;height:76px;border-radius:12px;background:radial-gradient(circle at 30% 25%,#ffd36b,#e0522f 55%,#7a1d12);flex:none;display:grid;place-items:center;font-family:var(--head);font-weight:800;font-size:1.6rem;color:#fff3}
+.now small{display:flex;align-items:center;gap:8px;color:var(--mint);font-size:.75rem;font-weight:600;letter-spacing:.08em}
+.now strong{display:block;font-family:var(--head);font-size:1.6rem;letter-spacing:-.02em;line-height:1.2}
+.now span{color:var(--muted);font-size:.85rem}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.bars i{width:3px;background:var(--lime);border-radius:2px;animation:bar 1s ease-in-out infinite}
+.bars i:nth-child(1){height:60%;animation-delay:-.2s}
+.bars i:nth-child(2){height:100%;animation-delay:-.5s}
+.bars i:nth-child(3){height:40%;animation-delay:-.8s}
+@keyframes bar{50%{transform:scaleY(.35)}}
+.bars i{transform-origin:bottom}
+.queue{margin-top:20px}
+.queue .row{display:grid;grid-template-columns:28px 1fr 60px;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;font-size:.88rem}
+.queue .row.cur{background:rgba(180,240,90,.1)}
+.queue .row .n{color:var(--muted)}
+.queue .row .t{color:var(--muted);text-align:right}
+.queue .row b{font-weight:600}
+.queue .row.cur b{color:var(--lime)}
+.queue .row em{display:block;font-style:normal;color:var(--muted);font-size:.78rem}
+.bar{margin:14px -28px 0;padding:14px 28px;border-top:1px solid var(--line);background:rgba(0,0,0,.25);display:flex;align-items:center;gap:20px}
+.bar .play{width:38px;height:38px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;gap:4px;flex:none}
+.bar .play i{width:4px;height:14px;background:#0a1f10;border-radius:2px;display:block}
+.track{flex:1;height:4px;border-radius:4px;background:rgba(255,255,255,.12);position:relative}
+.track:after{content:"";position:absolute;inset:0 88% 0 0;background:var(--lime);border-radius:4px}
+
+/* sections */
+section{padding:96px 0}
+.section-head{max-width:640px;margin-bottom:48px}
+.section-head h2{font-size:clamp(2rem,4.4vw,3.2rem);font-weight:800}
+.section-head p{margin-top:16px;color:var(--muted);font-size:1.1rem}
+
+.card{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.card h3{font-size:1.5rem;font-weight:700;margin-bottom:10px}
+.card p{color:var(--muted)}
+
+/* browser feature */
+.browser{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;padding:44px;border-radius:26px;border:1px solid rgba(180,240,90,.3);background:linear-gradient(135deg,rgba(40,100,55,.4),rgba(10,28,16,.6))}
+.browser h2{font-size:clamp(2rem,4vw,3rem);font-weight:800}
+.browser p{margin-top:16px;color:var(--muted);font-size:1.08rem;max-width:44ch}
+.browser ul{list-style:none;margin-top:22px;display:grid;gap:10px}
+.browser li{display:flex;gap:10px;align-items:flex-start}
+.browser li:before{content:"";flex:none;width:18px;height:18px;margin-top:4px;border-radius:50%;background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a1f10' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E") center/12px no-repeat}
+.bwin{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#081a0f;box-shadow:0 30px 60px -25px #000}
+.bwin .top{display:flex;gap:10px;align-items:center;padding:12px 14px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--line)}
+.bwin .url{flex:1;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:.82rem}
+.shield{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(180,240,90,.14);color:var(--lime);font-size:.8rem;font-weight:600}
+.bwin .page{padding:22px;display:grid;gap:12px}
+.ph{height:14px;border-radius:7px;background:rgba(255,255,255,.08)}
+.ph.w1{width:70%}.ph.w2{width:92%}.ph.w3{width:55%}
+.ph.vid{height:130px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.03))}
+.blocked{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:12px;border:1px dashed rgba(180,240,90,.4);color:var(--lime);font-size:.85rem}
+.blocked s{color:var(--muted)}
+
+/* features grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:.85rem;color:var(--text)}
+.chip.on{background:rgba(180,240,90,.14);border-color:rgba(180,240,90,.5);color:var(--lime)}
+.mini-q{margin-top:18px;display:grid;gap:6px}
+.mini-q div{display:flex;justify-content:space-between;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.22);font-size:.85rem}
+.mini-q span{color:var(--muted)}
+
+.card.wide{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.tray{display:grid;gap:10px;justify-items:end}
+.tray .tip{padding:8px 14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:.85rem;display:flex;gap:8px;align-items:center;margin-right:52px}
+.taskbar{display:flex;align-items:center;gap:10px;width:100%;max-width:380px;padding:10px 16px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--line);justify-content:flex-end}
+.ti{width:26px;height:26px;border-radius:7px;display:grid;place-items:center}
+.ti.dim{background:rgba(255,255,255,.1)}
+.ti.app{background:linear-gradient(145deg,#c9f77a,#5fd88a);box-shadow:0 0 0 4px rgba(180,240,90,.18)}
+.clock{margin-left:10px;color:var(--muted);font-size:.8rem}
+
+/* sound lab */
+.lab{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+.eq{display:flex;justify-content:space-between;gap:6px;margin-top:22px;height:190px}
+.band{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1}
+.band input{writing-mode:vertical-lr;direction:rtl;height:150px;width:28px}
+.band label{font-size:.75rem;color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{background:rgba(255,255,255,.14);border-radius:4px;width:4px;height:100%}
+input[type=range]::-moz-range-track{background:rgba(255,255,255,.14);border-radius:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--lime);border:3px solid #0a1f10;box-shadow:0 0 0 1px var(--lime)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--lime);border:3px solid #0a1f10}
+.hz input{writing-mode:horizontal-tb;direction:ltr;width:100%;height:20px}
+.hz input::-webkit-slider-runnable-track{height:4px;width:100%}
+.ctl{margin-top:20px}
+.ctl .l{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+.ctl .l span{color:var(--lime);font-variant-numeric:tabular-nums}
+.note{margin-top:20px;font-size:.82rem;color:var(--muted)}
+
+/* download */
+.dl{text-align:center;padding:72px 28px;border-radius:28px;border:1px solid rgba(180,240,90,.3);background:radial-gradient(600px 300px at 50% 0%,rgba(100,200,100,.25),transparent 70%),linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01))}
+.dl h2{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800}
+.dl p{margin:16px auto 32px;color:var(--muted);max-width:46ch;font-size:1.1rem}
+.dl .meta{margin-top:20px}
+
+footer{padding:40px 0 56px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+footer a:hover{color:var(--text)}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .browser,.lab,.grid,.card.wide{grid-template-columns:1fr}
+  .tray{justify-items:start}
+  .tray .tip{margin-right:0}
+  .browser{padding:26px}
+  .nav-links a:not(.btn){display:none}
+  .hero{padding-top:56px}
+  section{padding:64px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Stillwave home">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#0a1f10" stroke-width="2.6" stroke-linecap="round"><path d="M5 10v4M9 6v12M13 3v18M17 8v8M21 11v2"/></svg></span>
+      Stillwave
+    </a>
+    <div class="nav-links">
+      <a href="#browser">Browser</a>
+      <a href="#features">Library</a>
+      <a href="#sound">Sound</a>
+      <a class="btn btn-primary btn-sm" href="#download">Download</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>Music that stays sorted. Browsing without the ads.</h1>
+    <p class="lead">Stillwave is a music player for Windows. It organizes your library for you, lets you find new music in a built-in ad-free browser, and gives you real control over how everything sounds.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+        Download for Windows
+      </a>
+      <a class="btn btn-ghost" href="#features">See what's inside</a>
+      <span class="dlcount" id="dlcount" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+        <b id="dlnum">0</b> downloads
+      </span>
+    </div>
+    <p class="meta">Free to download. No account needed.</p>
+
+    <!-- App preview (swap for a real screenshot: <img src="screenshot.png" alt="Stillwave current queue"> ) -->
+    <div class="app" role="img" aria-label="Stillwave showing the interactive queue with a track playing">
+      <div class="side">
+        <div class="logo"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#0a1f10" stroke-width="2.6" stroke-linecap="round" width="16" height="16"><path d="M5 10v4M9 6v12M13 3v18M17 8v8M21 11v2"/></svg></span>Stillwave</div>
+        <div class="item on">Interactive Queue</div>
+        <div class="item">My Library</div>
+        <div class="item">Auto Sort</div>
+        <div class="item">Playlists</div>
+        <div class="item">Browser</div>
+      </div>
+      <div class="main">
+        <h3>Interactive Queue</h3>
+        <div class="sub">Your listening lineup</div>
+        <div class="now">
+          <div class="cover">♪</div>
+          <div>
+            <small><span class="bars"><i></i><i></i><i></i></span> NOW PLAYING</small>
+            <strong>Cornfield Chase</strong>
+            <span>Hans Zimmer · Interstellar</span>
+          </div>
+        </div>
+        <div class="queue">
+          <div class="row"><span class="n">1</span><div><b>Hedwig's Theme</b><em>John Williams · Harry Potter and the Sorcerer's Stone</em></div><span class="t">5:06</span></div>
+          <div class="row"><span class="n">2</span><div><b>Now We Are Free</b><em>Hans Zimmer · Gladiator</em></div><span class="t">4:16</span></div>
+          <div class="row cur"><span class="n">3</span><div><b>Cornfield Chase</b><em>Hans Zimmer · Interstellar</em></div><span class="t">2:06</span></div>
+          <div class="row"><span class="n">4</span><div><b>Time</b><em>Hans Zimmer · Inception</em></div><span class="t">4:35</span></div>
+        </div>
+        <div class="bar">
+          <span class="play"><i></i><i></i></span>
+          <span style="font-size:.8rem;color:var(--muted)">0:05</span>
+          <div class="track"></div>
+          <span style="font-size:.8rem;color:var(--muted)">2:06</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="browser">
+  <div class="wrap">
+    <div class="browser">
+      <div>
+        <h2>A browser built into your player</h2>
+        <p>Search for a song, open a playlist or read about an artist without leaving Stillwave. Ads, trackers and pop-ups are blocked by default, so pages load faster and stay out of your way.</p>
+        <ul>
+          <li>Adblock is on from the first launch</li>
+          <li>Switch between listening and browsing in one click</li>
+          <li>One window instead of a player plus a browser</li>
+        </ul>
+      </div>
+      <div class="bwin" role="img" aria-label="Preview of the Stillwave browser with ads blocked">
+        <div class="top">
+          <span class="url">music-site.example/new-releases</span>
+          <span class="shield">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+            12 blocked
+          </span>
+        </div>
+        <div class="page">
+          <div class="blocked"><span>Ad removed</span><s>Banner 728×90</s></div>
+          <div class="ph w1"></div>
+          <div class="ph vid"></div>
+          <div class="ph w2"></div>
+          <div class="blocked"><span>Pop-up stopped</span><s>Tracker script</s></div>
+          <div class="ph w3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Your library, organized without effort</h2>
+      <p>Add a folder and Stillwave takes it from there. Build your listening order in the queue, then let Auto Sort handle the rest.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>A queue that's easy to use</h3>
+        <p>See what's playing and what's next at a glance. Reorder tracks, remove the ones you don't want and clear the queue in one click.</p>
+        <div class="mini-q">
+          <div><b>Now playing</b><span>2:06</span></div>
+          <div><span>Next track</span><span>4:35</span></div>
+          <div><span>After that</span><span>5:06</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Auto Sort</h3>
+        <p>Messy folders and badly named files get sorted into a clean library automatically, using each track's tags.</p>
+        <div class="chips">
+          <span class="chip on">By album</span>
+          <span class="chip on">By artist</span>
+          <span class="chip on">By genre</span>
+        </div>
+      </div>
+      <div class="card wide">
+        <div>
+          <h3>Keeps playing in the background</h3>
+          <p>Close the window and the music doesn't stop. Stillwave tucks into the system tray, so it keeps playing while you work, and one click on the tray icon brings it back.</p>
+        </div>
+        <div class="tray" role="img" aria-label="Stillwave icon in the Windows system tray with a Now Playing tooltip">
+          <div class="tip"><span class="bars"><i></i><i></i><i></i></span> Stillwave · Playing</div>
+          <div class="taskbar">
+            <span class="ti dim"></span>
+            <span class="ti dim"></span>
+            <span class="ti app"><svg viewBox="0 0 24 24" fill="none" stroke="#0a1f10" stroke-width="2.8" stroke-linecap="round" width="14" height="14"><path d="M5 10v4M9 6v12M13 3v18M17 8v8M21 11v2"/></svg></span>
+            <span class="ti dim"></span>
+            <span class="clock">5:54 AM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sound">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Shape the sound</h2>
+      <p>An equalizer, reverb and directional sound are built in. Drag the controls below to see how they work.</p>
+    </div>
+    <div class="lab">
+      <div class="card">
+        <h3>Equalizer</h3>
+        <p>Lift the bass, soften the highs or flatten everything back out.</p>
+        <div class="eq" id="eq"></div>
+      </div>
+      <div class="card">
+        <h3>Reverb and direction</h3>
+        <p>Add room to a dry recording, or place the sound to the left or right.</p>
+        <div class="ctl hz">
+          <div class="l"><label for="rev">Reverb</label><span id="revv">20%</span></div>
+          <input id="rev" type="range" min="0" max="100" value="20">
+        </div>
+        <div class="ctl hz">
+          <div class="l"><label for="dir">Direction</label><span id="dirv">Center</span></div>
+          <input id="dir" type="range" min="-100" max="100" value="0">
+        </div>
+        <p class="note">This is a visual preview. The real controls live in the player.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="dl">
+      <h2>Get Stillwave</h2>
+      <p>Download the installer, run it, and you're listening in a minute.</p>
+      <!-- TODO: replace the link below with your real installer URL (e.g. a GitHub Releases link) -->
+      <a class="btn btn-primary" href="https://github.com/YOUR-USERNAME/stillwave/releases/latest/download/Stillwave-Setup.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 20h14"/></svg>
+        Download Stillwave-Setup.exe
+      </a>
+      <p class="meta">For Windows · Version 1.0</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr">2026</span> Stillwave</span>
+    <span><a href="#top">Back to top</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // Equalizer preview
+  const bands = [['60',4],['150',2],['400',-1],['1k',0],['3k',2],['8k',4],['16k',3]];
+  const eq = document.getElementById('eq');
+  bands.forEach(([hz,v])=>{
+    const d = document.createElement('div');
+    d.className = 'band';
+    d.innerHTML = '<input type="range" min="-12" max="12" value="'+v+'" aria-label="'+hz+' Hz gain"><label>'+hz+'</label>';
+    eq.appendChild(d);
+  });
+
+  // Download counter (reads GitHub Releases download counts)
+  const GH_REPO = 'YOUR-USERNAME/stillwave'; // <- change to your GitHub username/repo
+  (function(){
+    const box = document.getElementById('dlcount'), num = document.getElementById('dlnum');
+    const show = n => { num.textContent = Number(n).toLocaleString(); box.hidden = false; };
+    try {
+      const c = JSON.parse(localStorage.getItem('sw-dl') || 'null');
+      if (c && Date.now() - c.t < 600000) { show(c.n); return; }
+    } catch(e) {}
+    fetch('https://api.github.com/repos/' + GH_REPO + '/releases?per_page=100')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(rel => {
+        const n = rel.reduce((s, r) => s + r.assets.reduce((a, x) => a + x.download_count, 0), 0);
+        show(n);
+        try { localStorage.setItem('sw-dl', JSON.stringify({n, t: Date.now()})); } catch(e) {}
+      })
+      .catch(() => {});
+  })();
+
+  // Reverb + direction preview
+  const rev = document.getElementById('rev'), revv = document.getElementById('revv');
+  rev.oninput = () => revv.textContent = rev.value + '%';
+  const dir = document.getElementById('dir'), dirv = document.getElementById('dirv');
+  dir.oninput = () => {
+    const v = +dir.value;
+    dirv.textContent = v === 0 ? 'Center' : (v < 0 ? 'Left ' : 'Right ') + (v === 0 ? '' : Math.abs(v) + '%');
+  };
+</script>
+</body>
+</html>
